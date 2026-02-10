@@ -1,135 +1,146 @@
-const lineCatalog = {
-  小田急線: {
-    code: "ODAKYU LINE",
-    color: "#84beff",
-    destinations: ["新宿", "町田", "本厚木", "小田原"],
-    stations: ["代々木上原", "下北沢", "登戸", "相模大野", "足柄"]
+const tramLines = {
+  sakura: {
+    nameJP: "都電荒川線（東京さくらトラム）",
+    nameEN: "Tokyo Sakura Tram",
+    operator: "東京都交通局",
+    color: "#168ddf",
+    accent: "#d13a58",
+    stations: [
+      { code: "SA01", jp: "三ノ輪橋", en: "Minowabashi", transfers: ["H"] },
+      { code: "SA03", jp: "荒川区役所前", en: "Arakawa-kuyakushomae", transfers: [] },
+      { code: "SA07", jp: "熊野前", en: "Kumanomae", transfers: ["NT"] },
+      { code: "SA10", jp: "宮ノ前", en: "Miyanomae", transfers: [] },
+      { code: "SA13", jp: "王子駅前", en: "Oji-ekimae", transfers: ["JR", "N"] },
+      { code: "SA16", jp: "庚申塚", en: "Koshinzuka", transfers: [] },
+      { code: "SA19", jp: "大塚駅前", en: "Otsuka-ekimae", transfers: ["JR"] },
+      { code: "SA23", jp: "東池袋四丁目", en: "Higashi-ikebukuro-yonchome", transfers: ["Y"] },
+      { code: "SA30", jp: "早稲田", en: "Waseda", transfers: ["T"] }
+    ]
   },
-  山手線: {
-    code: "JR YAMANOTE",
-    color: "#99f78f",
-    destinations: ["渋谷", "池袋", "上野", "品川"],
-    stations: ["原宿", "新宿", "高田馬場", "大塚", "秋葉原"]
+  hiroden: {
+    nameJP: "広島電鉄本線",
+    nameEN: "Hiroden Main Line",
+    operator: "広島電鉄",
+    color: "#00a870",
+    accent: "#e74e37",
+    stations: [
+      { code: "HI01", jp: "広島駅", en: "Hiroshima Station", transfers: ["JR", "S"] },
+      { code: "HI02", jp: "猿猴橋町", en: "Enkobashicho", transfers: [] },
+      { code: "HI03", jp: "的場町", en: "Matobacho", transfers: ["5"] },
+      { code: "HI04", jp: "稲荷町", en: "Inarimachi", transfers: [] },
+      { code: "HI05", jp: "銀山町", en: "Kanayamacho", transfers: [] },
+      { code: "HI06", jp: "八丁堀", en: "Hatchobori", transfers: ["A", "B"] },
+      { code: "HI07", jp: "立町", en: "Tatemachi", transfers: [] },
+      { code: "HI08", jp: "紙屋町東", en: "Kamiyacho-higashi", transfers: ["A", "B"] },
+      { code: "HI09", jp: "原爆ドーム前", en: "Genbaku Dome-mae", transfers: ["BRT"] },
+      { code: "HI10", jp: "広電西広島", en: "Hiroden Nishi-Hiroshima", transfers: ["JR"] }
+    ]
   },
-  京王線: {
-    code: "KEIO LINE",
-    color: "#ff9dd0",
-    destinations: ["新宿", "橋本", "京王八王子", "高尾山口"],
-    stations: ["笹塚", "明大前", "千歳烏山", "調布", "府中"]
-  },
-  東急東横線: {
-    code: "TOKYU TOYOKO",
-    color: "#ffd07d",
-    destinations: ["渋谷", "横浜", "元町・中華街", "菊名"],
-    stations: ["中目黒", "自由が丘", "武蔵小杉", "日吉", "綱島"]
+  lightline: {
+    nameJP: "宇都宮ライトレール",
+    nameEN: "Utsunomiya Light Line",
+    operator: "宇都宮ライトレール",
+    color: "#f5be22",
+    accent: "#f08a00",
+    stations: [
+      { code: "UL01", jp: "宇都宮駅東口", en: "Utsunomiya East", transfers: ["JR"] },
+      { code: "UL02", jp: "東宿郷", en: "Higashi-Shukugo", transfers: [] },
+      { code: "UL03", jp: "駅東公園前", en: "Ekihigashi Park", transfers: [] },
+      { code: "UL04", jp: "峰", en: "Mine", transfers: [] },
+      { code: "UL05", jp: "宇都宮大学陽東キャンパス", en: "Yoto Campus", transfers: ["U"] },
+      { code: "UL06", jp: "平石", en: "Hiraishi", transfers: ["Depot"] },
+      { code: "UL07", jp: "飛山城跡", en: "Tobiyama Castle", transfers: [] },
+      { code: "UL08", jp: "清原地区市民センター前", en: "Kiyohara Civic Center", transfers: [] },
+      { code: "UL09", jp: "清陵高校前", en: "Seiryo HS", transfers: [] },
+      { code: "UL10", jp: "芳賀台", en: "Hagadai", transfers: ["Ind"] },
+      { code: "UL11", jp: "芳賀・高根沢工業団地", en: "Haga-Takanezawa", transfers: ["Tech"] }
+    ]
   }
 };
 
-const stationEn = {
-  新宿: "Shinjuku",
-  町田: "Machida",
-  本厚木: "Hon-Atsugi",
-  小田原: "Odawara",
-  代々木上原: "Yoyogi-Uehara",
-  下北沢: "Shimokitazawa",
-  登戸: "Noborito",
-  相模大野: "Sagamiono",
-  足柄: "Ashigara",
-  渋谷: "Shibuya",
-  池袋: "Ikebukuro",
-  上野: "Ueno",
-  品川: "Shinagawa",
-  原宿: "Harajuku",
-  高田馬場: "Takadanobaba",
-  大塚: "Otsuka",
-  秋葉原: "Akihabara",
-  橋本: "Hashimoto",
-  京王八王子: "Keio-Hachioji",
-  高尾山口: "Takaosanguchi",
-  笹塚: "Sasazuka",
-  明大前: "Meidaimae",
-  千歳烏山: "Chitose-Karasuyama",
-  調布: "Chofu",
-  府中: "Fuchu",
-  横浜: "Yokohama",
-  "元町・中華街": "Motomachi-Chukagai",
-  菊名: "Kikuna",
-  中目黒: "Nakameguro",
-  自由が丘: "Jiyugaoka",
-  武蔵小杉: "Musashi-Kosugi",
-  日吉: "Hiyoshi",
-  綱島: "Tsunashima"
+const serviceMap = {
+  普通: { jp: "普通", en: "LOCAL" },
+  快速: { jp: "快速", en: "RAPID" },
+  臨時: { jp: "臨時", en: "SPECIAL" },
+  回送: { jp: "回送", en: "OUT OF SERVICE" }
 };
 
-const serviceEn = {
-  各駅停車: "LOCAL",
-  快速: "RAPID",
-  急行: "EXPRESS",
-  特急: "LIMITED EXPRESS"
+const doorMap = {
+  right: { jp: "右側が開きます", en: "Doors open on the right" },
+  left: { jp: "左側が開きます", en: "Doors open on the left" },
+  both: { jp: "両側が開きます", en: "Doors open on both sides" }
 };
 
-const doorInfo = {
-  right: {
-    jp: "扉は右側です。",
-    en: "Doors open on the right."
-  },
-  left: {
-    jp: "扉は左側です。",
-    en: "Doors open on the left."
-  },
-  both: {
-    jp: "扉は両側です。",
-    en: "Doors open on both sides."
-  }
+const crowdMap = {
+  low: "空席多め",
+  mid: "標準",
+  high: "混雑"
 };
 
-const lineSelect = document.getElementById("lineSelect");
-const serviceSelect = document.getElementById("serviceSelect");
-const destinationSelect = document.getElementById("destinationSelect");
-const nextStationSelect = document.getElementById("nextStationSelect");
-const doorSelect = document.getElementById("doorSelect");
-const trainNumberInput = document.getElementById("trainNumberInput");
-const customMessageInput = document.getElementById("customMessageInput");
-const randomizeButton = document.getElementById("randomizeButton");
-
-const ledBoard = document.getElementById("ledBoard");
-const lineBadge = document.getElementById("lineBadge");
-const trainNumberDisplay = document.getElementById("trainNumberDisplay");
-const boardClock = document.getElementById("boardClock");
-const destinationJP = document.getElementById("destinationJP");
-const destinationEN = document.getElementById("destinationEN");
-const serviceEN = document.getElementById("serviceEN");
-const nextStationJP = document.getElementById("nextStationJP");
-const nextStationEN = document.getElementById("nextStationEN");
-const doorInfoJP = document.getElementById("doorInfoJP");
-const doorInfoEN = document.getElementById("doorInfoEN");
-const scrollText = document.getElementById("scrollText");
-
-const defaultScrollMessages = [
-  "まもなく次駅です。黄色い点字ブロックの内側でお待ちください。",
-  "This train is for rapid boarding flow. Please move inside the car.",
-  "優先席付近では携帯電話の電源をお切りください。",
-  "本日はDENSHALEDをご覧いただきありがとうございます。"
+const pageCatalog = [
+  { code: "A", label: "停車案内" },
+  { code: "B", label: "路線図" },
+  { code: "C", label: "運行情報" }
 ];
 
-let scrollIndex = 0;
+const ui = {
+  tramDisplay: document.getElementById("tramDisplay"),
+  lineSelect: document.getElementById("lineSelect"),
+  serviceSelect: document.getElementById("serviceSelect"),
+  currentStationSelect: document.getElementById("currentStationSelect"),
+  destinationSelect: document.getElementById("destinationSelect"),
+  doorSelect: document.getElementById("doorSelect"),
+  crowdSelect: document.getElementById("crowdSelect"),
+  speedRange: document.getElementById("speedRange"),
+  delayInput: document.getElementById("delayInput"),
+  displayModeSelect: document.getElementById("displayModeSelect"),
+  pageSelect: document.getElementById("pageSelect"),
+  trainNumberInput: document.getElementById("trainNumberInput"),
+  customMessageInput: document.getElementById("customMessageInput"),
+  randomizeButton: document.getElementById("randomizeButton"),
+  nextPageButton: document.getElementById("nextPageButton"),
+  serviceBadgeJP: document.getElementById("serviceBadgeJP"),
+  serviceBadgeEN: document.getElementById("serviceBadgeEN"),
+  destinationJP: document.getElementById("destinationJP"),
+  destinationEN: document.getElementById("destinationEN"),
+  lineNameEN: document.getElementById("lineNameEN"),
+  trainNumberDisplay: document.getElementById("trainNumberDisplay"),
+  clockDisplay: document.getElementById("clockDisplay"),
+  nextStationJP: document.getElementById("nextStationJP"),
+  nextStationEN: document.getElementById("nextStationEN"),
+  nextStationCode: document.getElementById("nextStationCode"),
+  currentStationJP: document.getElementById("currentStationJP"),
+  currentStationEN: document.getElementById("currentStationEN"),
+  currentStationCode: document.getElementById("currentStationCode"),
+  doorInfoJP: document.getElementById("doorInfoJP"),
+  doorInfoEN: document.getElementById("doorInfoEN"),
+  speedValue: document.getElementById("speedValue"),
+  crowdValue: document.getElementById("crowdValue"),
+  delayValue: document.getElementById("delayValue"),
+  operatorValue: document.getElementById("operatorValue"),
+  directionJP: document.getElementById("directionJP"),
+  directionEN: document.getElementById("directionEN"),
+  routeProgress: document.getElementById("routeProgress"),
+  routeStations: document.getElementById("routeStations"),
+  noticeList: document.getElementById("noticeList"),
+  pageChip: document.getElementById("pageChip"),
+  tickerText: document.getElementById("tickerText")
+};
 
-function fillSelect(select, values) {
-  select.innerHTML = "";
-  values.forEach((value) => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value;
-    select.append(option);
-  });
+let pageIndex = 0;
+let pageTimer = null;
+let tickerStep = 0;
+let currentState = null;
+
+function createOption(value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  return option;
 }
 
-function toEnglish(name) {
-  return stationEn[name] || name;
-}
-
-function renderClock() {
-  boardClock.textContent = new Intl.DateTimeFormat("ja-JP", {
+function formatClock() {
+  ui.clockDisplay.textContent = new Intl.DateTimeFormat("ja-JP", {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
@@ -137,98 +148,332 @@ function renderClock() {
   }).format(new Date());
 }
 
-function getBaseScrollText() {
-  const lineName = lineSelect.value;
-  const service = serviceSelect.value;
-  const destination = destinationSelect.value;
-  const next = nextStationSelect.value;
-  return `[${lineName}] ${service} ${destination}ゆき / Next ${toEnglish(next)}`;
+function setupLineOptions() {
+  ui.lineSelect.innerHTML = "";
+  Object.entries(tramLines).forEach(([key, line]) => {
+    ui.lineSelect.append(createOption(key, line.nameJP));
+  });
+
+  ui.lineSelect.value = "sakura";
 }
 
-function renderBoard() {
-  const lineName = lineSelect.value;
-  const line = lineCatalog[lineName];
-  const service = serviceSelect.value;
-  const destination = destinationSelect.value;
-  const next = nextStationSelect.value;
-  const door = doorSelect.value;
-  const trainNo = trainNumberInput.value.trim() || "1275E";
+function populateStationsForLine(preserveSelection = false) {
+  const line = tramLines[ui.lineSelect.value];
+  const oldCurrent = preserveSelection ? ui.currentStationSelect.value : "";
+  const oldDestination = preserveSelection ? ui.destinationSelect.value : "";
 
-  ledBoard.style.setProperty("--line-color", line.color);
+  ui.currentStationSelect.innerHTML = "";
+  ui.destinationSelect.innerHTML = "";
 
-  lineBadge.textContent = line.code;
-  trainNumberDisplay.textContent = `列車番号 ${trainNo.toUpperCase()}`;
-  destinationJP.textContent = `${service} ${destination} ゆき`;
-  serviceEN.textContent = serviceEn[service];
-  destinationEN.textContent = toEnglish(destination);
-  nextStationJP.textContent = next;
-  nextStationEN.textContent = toEnglish(next);
-  doorInfoJP.textContent = doorInfo[door].jp;
-  doorInfoEN.textContent = doorInfo[door].en;
+  line.stations.forEach((station) => {
+    const label = `${station.code} ${station.jp}`;
+    ui.currentStationSelect.append(createOption(station.code, label));
+    ui.destinationSelect.append(createOption(station.code, label));
+  });
 
-  const custom = customMessageInput.value.trim();
-  scrollText.textContent = custom || `${getBaseScrollText()} / ${defaultScrollMessages[scrollIndex]}`;
-}
+  const hasCurrent = line.stations.some((station) => station.code === oldCurrent);
+  const hasDestination = line.stations.some((station) => station.code === oldDestination);
 
-function syncRouteOptions() {
-  const lineName = lineSelect.value;
-  const line = lineCatalog[lineName];
+  ui.currentStationSelect.value = hasCurrent ? oldCurrent : line.stations[0].code;
+  ui.destinationSelect.value = hasDestination ? oldDestination : line.stations[line.stations.length - 1].code;
 
-  fillSelect(destinationSelect, line.destinations);
-  fillSelect(nextStationSelect, line.stations);
-
-  renderBoard();
-}
-
-function randomItem(array) {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-function randomizeBoard() {
-  const lineNames = Object.keys(lineCatalog);
-  const lineName = randomItem(lineNames);
-  const line = lineCatalog[lineName];
-  const services = Object.keys(serviceEn);
-  const doorModes = Object.keys(doorInfo);
-
-  lineSelect.value = lineName;
-  fillSelect(destinationSelect, line.destinations);
-  fillSelect(nextStationSelect, line.stations);
-
-  serviceSelect.value = randomItem(services);
-  destinationSelect.value = randomItem(line.destinations);
-  nextStationSelect.value = randomItem(line.stations);
-  doorSelect.value = randomItem(doorModes);
-  trainNumberInput.value = `${Math.floor(1000 + Math.random() * 8999)}${String.fromCharCode(65 + Math.floor(Math.random() * 5))}`;
-
-  renderBoard();
-}
-
-function initializeLineSelect() {
-  fillSelect(lineSelect, Object.keys(lineCatalog));
-  lineSelect.value = "小田急線";
-  syncRouteOptions();
-}
-
-setInterval(() => {
-  renderClock();
-}, 1000);
-
-setInterval(() => {
-  scrollIndex = (scrollIndex + 1) % defaultScrollMessages.length;
-  if (!customMessageInput.value.trim()) {
-    renderBoard();
+  if (ui.currentStationSelect.value === ui.destinationSelect.value && line.stations.length > 1) {
+    ui.destinationSelect.value = line.stations[line.stations.length - 1].code;
   }
-}, 5500);
+}
 
-[lineSelect, serviceSelect, destinationSelect, nextStationSelect, doorSelect, trainNumberInput, customMessageInput].forEach((element) => {
-  element.addEventListener("input", renderBoard);
-  element.addEventListener("change", renderBoard);
+function stationIndexByCode(line, stationCode) {
+  const index = line.stations.findIndex((station) => station.code === stationCode);
+  return index >= 0 ? index : 0;
+}
+
+function buildState() {
+  const line = tramLines[ui.lineSelect.value];
+  const currentIndex = stationIndexByCode(line, ui.currentStationSelect.value);
+  const destinationIndex = stationIndexByCode(line, ui.destinationSelect.value);
+  const direction = destinationIndex >= currentIndex ? 1 : -1;
+  const nextIndex = currentIndex === destinationIndex ? currentIndex : currentIndex + direction;
+  const current = line.stations[currentIndex];
+  const next = line.stations[nextIndex];
+  const destination = line.stations[destinationIndex];
+  const service = serviceMap[ui.serviceSelect.value];
+  const door = doorMap[ui.doorSelect.value];
+  const speed = Number(ui.speedRange.value) || 0;
+  const delayMinutes = Math.max(0, Number(ui.delayInput.value) || 0);
+
+  return {
+    line,
+    current,
+    next,
+    destination,
+    currentIndex,
+    nextIndex,
+    destinationIndex,
+    direction,
+    service,
+    door,
+    speed,
+    crowd: crowdMap[ui.crowdSelect.value],
+    delayMinutes,
+    trainNumber: (ui.trainNumberInput.value.trim().toUpperCase() || "A124").replace(/[^A-Z0-9-]/g, ""),
+    customMessage: ui.customMessageInput.value.trim()
+  };
+}
+
+function renderHeader(state) {
+  ui.tramDisplay.style.setProperty("--line-color", state.line.color);
+  ui.tramDisplay.style.setProperty("--line-accent", state.line.accent);
+
+  ui.serviceBadgeJP.textContent = state.service.jp;
+  ui.serviceBadgeEN.textContent = state.service.en;
+  ui.destinationJP.textContent = `${state.destination.jp}`;
+  ui.destinationEN.textContent = state.destination.en;
+  ui.lineNameEN.textContent = state.line.nameEN;
+  ui.trainNumberDisplay.textContent = `TRAM ${state.trainNumber}`;
+}
+
+function renderPanels(state) {
+  ui.nextStationJP.textContent = state.next.jp;
+  ui.nextStationEN.textContent = state.next.en;
+  ui.nextStationCode.textContent = state.next.code;
+
+  ui.currentStationJP.textContent = state.current.jp;
+  ui.currentStationEN.textContent = state.current.en;
+  ui.currentStationCode.textContent = state.current.code;
+
+  ui.doorInfoJP.textContent = state.door.jp;
+  ui.doorInfoEN.textContent = state.door.en;
+  ui.speedValue.textContent = `${state.speed} km/h`;
+  ui.crowdValue.textContent = state.crowd;
+  ui.delayValue.textContent = state.delayMinutes > 0 ? `${state.delayMinutes}分遅れ` : "平常運転";
+  ui.operatorValue.textContent = state.line.operator;
+
+  ui.directionJP.textContent = `${state.destination.jp} 方面`;
+  ui.directionEN.textContent = `bound for ${state.destination.en}`;
+}
+
+function stationClass(state, index) {
+  const min = Math.min(state.currentIndex, state.destinationIndex);
+  const max = Math.max(state.currentIndex, state.destinationIndex);
+  const inside = index >= min && index <= max;
+
+  if (!inside) {
+    return "is-outside";
+  }
+
+  if (index === state.currentIndex) {
+    return "is-current";
+  }
+
+  if (index === state.nextIndex && state.currentIndex !== state.destinationIndex) {
+    return "is-next";
+  }
+
+  const isPassed = (state.direction === 1 && index < state.currentIndex) || (state.direction === -1 && index > state.currentIndex);
+
+  return isPassed ? "is-passed" : "is-future";
+}
+
+function renderRouteStations(state) {
+  ui.routeStations.innerHTML = "";
+  ui.routeStations.style.setProperty("--station-count", state.line.stations.length);
+
+  state.line.stations.forEach((station, index) => {
+    const node = document.createElement("article");
+    node.className = `route-station ${stationClass(state, index)}`;
+
+    const transferBadges = station.transfers.length
+      ? `<div class="transfer-badges">${station.transfers.map((transfer) => `<span>${transfer}</span>`).join("")}</div>`
+      : '<div class="transfer-badges"></div>';
+
+    node.innerHTML = `
+      <p class="route-name-jp">${station.jp}</p>
+      <p class="route-name-en">${station.en}</p>
+      <div class="route-dot"></div>
+      <div class="route-code">${station.code}</div>
+      ${transferBadges}
+    `;
+
+    ui.routeStations.append(node);
+  });
+
+  const progress = state.line.stations.length > 1 ? (state.currentIndex / (state.line.stations.length - 1)) * 100 : 0;
+  ui.routeProgress.style.width = `calc((100% - 3rem) * ${progress / 100})`;
+}
+
+function renderNotices(state) {
+  const upcoming = [];
+  let pointer = state.currentIndex;
+
+  while (upcoming.length < 4) {
+    pointer += state.direction;
+
+    if (pointer < 0 || pointer >= state.line.stations.length) {
+      break;
+    }
+
+    upcoming.push(state.line.stations[pointer]);
+
+    if (pointer === state.destinationIndex) {
+      break;
+    }
+  }
+
+  const upcomingText =
+    upcoming
+      .map((station) => `${station.jp}${station.transfers.length ? ` [${station.transfers.join("/")}]` : ""}`)
+      .join(" → ") || "案内対象の停車駅はありません";
+
+  const messages = [
+    `次駅: ${state.next.jp} (${state.next.en}) / ${state.door.jp}`,
+    `この先の停車案内: ${upcomingText}`,
+    `運行状況: ${state.delayMinutes > 0 ? `${state.delayMinutes}分程度の遅れで運行中` : "平常通り運転しています"}`,
+    `乗務案内: ワンマン運転です。発車時はつり革・手すりをお持ちください。`
+  ];
+
+  ui.noticeList.innerHTML = "";
+  messages.forEach((message) => {
+    const li = document.createElement("li");
+    li.textContent = message;
+    ui.noticeList.append(li);
+  });
+}
+
+function buildTickerMessages(state) {
+  return [
+    `${state.line.nameJP} ${state.service.jp} ${state.destination.jp}ゆきです。`,
+    `Next stop is ${state.next.en}. ${state.door.en}.`,
+    state.delayMinutes > 0
+      ? `現在、${state.delayMinutes}分程度の遅れで運転しております。`
+      : "現在、平常通り運転しております。",
+    "駆け込み乗車はおやめください。黄色い点字ブロックの内側でお待ちください。"
+  ];
+}
+
+function renderTicker(state) {
+  const defaults = buildTickerMessages(state);
+  const message = state.customMessage || defaults[(tickerStep + pageIndex) % defaults.length];
+
+  ui.tickerText.textContent = message;
+  ui.tickerText.classList.remove("animate");
+  void ui.tickerText.offsetWidth;
+  ui.tickerText.classList.add("animate");
+}
+
+function setPage(nextPage) {
+  const total = pageCatalog.length;
+  pageIndex = ((nextPage % total) + total) % total;
+
+  ui.tramDisplay.dataset.page = String(pageIndex);
+  ui.pageSelect.value = String(pageIndex);
+  ui.pageChip.textContent = `PAGE ${pageCatalog[pageIndex].code} | ${pageCatalog[pageIndex].label}`;
+
+  if (currentState) {
+    renderTicker(currentState);
+  }
+}
+
+function syncDisplayMode() {
+  const auto = ui.displayModeSelect.value === "auto";
+  ui.pageSelect.disabled = auto;
+
+  if (auto && !pageTimer) {
+    pageTimer = setInterval(() => {
+      setPage(pageIndex + 1);
+    }, 8500);
+  }
+
+  if (!auto && pageTimer) {
+    clearInterval(pageTimer);
+    pageTimer = null;
+  }
+
+  if (!auto) {
+    setPage(Number(ui.pageSelect.value));
+  }
+}
+
+function renderAll() {
+  const state = buildState();
+  currentState = state;
+
+  renderHeader(state);
+  renderPanels(state);
+  renderRouteStations(state);
+  renderNotices(state);
+  renderTicker(state);
+}
+
+function randomItem(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+function randomizeState() {
+  const lineKey = randomItem(Object.keys(tramLines));
+  ui.lineSelect.value = lineKey;
+  populateStationsForLine(false);
+
+  const stations = tramLines[lineKey].stations;
+  const stationCodes = stations.map((station) => station.code);
+
+  ui.currentStationSelect.value = randomItem(stationCodes);
+  ui.destinationSelect.value = randomItem(stationCodes);
+
+  if (ui.currentStationSelect.value === ui.destinationSelect.value && stationCodes.length > 1) {
+    ui.destinationSelect.value = stationCodes[(stationCodes.indexOf(ui.currentStationSelect.value) + 1) % stationCodes.length];
+  }
+
+  ui.serviceSelect.value = randomItem(Object.keys(serviceMap));
+  ui.doorSelect.value = randomItem(Object.keys(doorMap));
+  ui.crowdSelect.value = randomItem(Object.keys(crowdMap));
+  ui.speedRange.value = String(Math.floor(Math.random() * 65));
+  ui.delayInput.value = String(Math.floor(Math.random() * 7));
+  ui.trainNumberInput.value = `${String.fromCharCode(65 + Math.floor(Math.random() * 3))}${100 + Math.floor(Math.random() * 900)}`;
+  ui.customMessageInput.value = "";
+
+  renderAll();
+}
+
+function initialize() {
+  setupLineOptions();
+  populateStationsForLine(false);
+  setPage(0);
+  syncDisplayMode();
+  formatClock();
+  renderAll();
+}
+
+ui.lineSelect.addEventListener("change", () => {
+  populateStationsForLine(true);
+  renderAll();
 });
 
-lineSelect.addEventListener("change", syncRouteOptions);
-randomizeButton.addEventListener("click", randomizeBoard);
+[
+  ui.serviceSelect,
+  ui.currentStationSelect,
+  ui.destinationSelect,
+  ui.doorSelect,
+  ui.crowdSelect,
+  ui.speedRange,
+  ui.delayInput,
+  ui.trainNumberInput,
+  ui.customMessageInput
+].forEach((element) => {
+  element.addEventListener("input", renderAll);
+  element.addEventListener("change", renderAll);
+});
 
-initializeLineSelect();
-renderClock();
-renderBoard();
+ui.displayModeSelect.addEventListener("change", syncDisplayMode);
+ui.pageSelect.addEventListener("change", () => setPage(Number(ui.pageSelect.value)));
+ui.nextPageButton.addEventListener("click", () => setPage(pageIndex + 1));
+ui.randomizeButton.addEventListener("click", randomizeState);
+
+setInterval(formatClock, 1000);
+setInterval(() => {
+  tickerStep += 1;
+  if (currentState) {
+    renderTicker(currentState);
+  }
+}, 5200);
+
+initialize();
