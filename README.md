@@ -1,48 +1,68 @@
 # DENSHALED
 
-A static website inspired by the layout style of the FreedomTrain article page ([reference](https://freedomtrain.jp/mamouna_owo/5425/)), rebuilt as an interactive Japanese train LED screen simulator.
+Modern Japanese tram LCD recreation inspired by FreedomTrain design workflows and real LCD animation references.
 
-## What this site includes
+## Features
 
-- Mint-toned, rounded-card layout inspired by the reference article design
-- Interactive train LED display simulation with:
-  - line presets (小田急線 / 山手線 / 京王線 / 東急東横線)
-  - service type (各駅停車 / 快速 / 急行 / 特急)
-  - destination + next station switching
-  - door-side announcements (left/right/both)
-  - live clock and train number
-  - scrolling LED information text
-- Responsive behavior for desktop and mobile
+- Complex multi-zone tram display (destination bar, next/now/status panels, route strip, info pages)
+- Auto travel phases: `走行中` -> `まもなく到着` -> `停車中`
+- Station progression with route highlighting and page transitions
+- Rolling multilingual text (Kanji / Hiragana / English)
+- Timed stop announcements
+  - `approach` phase: next-stop announcement
+  - `arrived` phase: arrival announcement
+- Audio playback modes in UI:
+  - `自動（音声ファイル優先）` = use generated files, fallback to browser speech
+  - `ブラウザ音声合成のみ`
+  - `停止`
 
-## Files
+## Project Files
 
-- `index.html`: page structure and content
-- `styles.css`: visual system and responsive layout
-- `script.js`: LED simulator logic and interactions
+- `index.html`: display + control panel structure
+- `styles.css`: visual system + animation definitions
+- `script.js`: simulator state machine, timing, announcements, and playback
+- `scripts/generate_stop_audio.py`: batch generation of per-stop TTS assets
 - `.github/workflows/deploy-pages.yml`: GitHub Pages deployment workflow
 
-## Run locally
+## Run Locally
 
 ```bash
-# from repository root
 python3 -m http.server 8000
 ```
 
-Then open: `http://localhost:8000`
+Open: `http://localhost:8000`
 
-## Deploy to GitHub Pages
+## Generate Stop Audio (OpenAI Speech)
 
-This repository is configured to deploy automatically via GitHub Actions on every push to `main`.
+This project supports pre-generated stop audio files under `assets/audio/stops/`.
 
-1. Push changes to `main`.
-2. In GitHub repo settings, set **Pages** source to **GitHub Actions**.
-3. Confirm the workflow `Deploy DENSHALED to GitHub Pages` succeeds.
+1. Set your API key:
 
-The workflow is defined in:
+```bash
+export OPENAI_API_KEY="your_key_here"
+```
 
-- `.github/workflows/deploy-pages.yml`
+2. Generate all lines:
 
-## Notes
+```bash
+python3 scripts/generate_stop_audio.py
+```
 
-- The implementation follows the **style direction** of the reference page, not a literal copy of article content.
-- Deployment artifact excludes `.git`, `.github`, Playwright outputs, and local debug folders.
+3. (Optional) dry-run without API calls:
+
+```bash
+python3 scripts/generate_stop_audio.py --dry-run --line sakura
+```
+
+If no generated files are present, the simulator can still announce stops with browser speech synthesis in `ブラウザ音声合成のみ` mode.
+
+Generated files are named like:
+
+- `assets/audio/stops/sakura/SA13_approach.mp3`
+- `assets/audio/stops/sakura/SA13_arrived.mp3`
+
+## GitHub Pages Deploy
+
+1. Push to `main`
+2. Ensure Pages source is set to **GitHub Actions**
+3. Verify workflow: `Deploy DENSHALED to GitHub Pages`

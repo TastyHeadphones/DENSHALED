@@ -103,6 +103,10 @@
                   <strong id="phaseValue">走行中</strong>
                 </div>
                 <div class="status-row">
+                  <span>音声案内</span>
+                  <strong id="audioStatusValue">待機中</strong>
+                </div>
+                <div class="status-row">
                   <span>混雑度</span>
                   <strong id="crowdValue">標準</strong>
                 </div>
@@ -224,6 +228,20 @@
           </label>
 
           <label>
+            音声案内
+            <select id="audioModeSelect" name="audioMode">
+              <option value="hybrid" selected>自動（音声ファイル優先）</option>
+              <option value="speech">ブラウザ音声合成のみ</option>
+              <option value="off">停止</option>
+            </select>
+          </label>
+
+          <label>
+            音量
+            <input id="audioVolumeRange" name="audioVolume" type="range" min="0" max="100" step="1" value="86" />
+          </label>
+
+          <label>
             駅間走行時間 (秒)
             <input id="segmentDurationInput" name="segmentDuration" type="number" min="6" max="40" value="14" />
           </label>
@@ -260,6 +278,7 @@
             <li>次駅 / 現在駅 / ステータスの3分割</li>
             <li>駅ごとのコード・乗換略号を含む停車駅ストリップ</li>
             <li>停車案内 / 路線図 / 運行情報のページ切替</li>
+            <li>音声案内はAI生成（またはブラウザ音声合成）です</li>
           </ul>
         </section>
       </aside>

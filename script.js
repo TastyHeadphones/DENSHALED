@@ -71,6 +71,12 @@ const doorMap = {
   both: { jp: "両側が開きます", en: "Doors open on both sides" }
 };
 
+const doorSpeechMap = {
+  right: { jp: "ドアは右側です。", en: "Doors will open on the right." },
+  left: { jp: "ドアは左側です。", en: "Doors will open on the left." },
+  both: { jp: "ドアは両側です。", en: "Doors will open on both sides." }
+};
+
 const crowdMap = {
   low: "空席多め",
   mid: "標準",
@@ -103,6 +109,8 @@ const ui = {
   displayModeSelect: document.getElementById("displayModeSelect"),
   pageSelect: document.getElementById("pageSelect"),
   motionSelect: document.getElementById("motionSelect"),
+  audioModeSelect: document.getElementById("audioModeSelect"),
+  audioVolumeRange: document.getElementById("audioVolumeRange"),
   segmentDurationInput: document.getElementById("segmentDurationInput"),
   trainNumberInput: document.getElementById("trainNumberInput"),
   customMessageInput: document.getElementById("customMessageInput"),
@@ -128,6 +136,7 @@ const ui = {
   doorInfoEN: document.getElementById("doorInfoEN"),
   speedValue: document.getElementById("speedValue"),
   phaseValue: document.getElementById("phaseValue"),
+  audioStatusValue: document.getElementById("audioStatusValue"),
   crowdValue: document.getElementById("crowdValue"),
   delayValue: document.getElementById("delayValue"),
   operatorValue: document.getElementById("operatorValue"),
@@ -151,6 +160,17 @@ const journey = {
   dwellRemaining: 0,
   phase: "cruise",
   moving: true
+};
+
+const audioState = {
+  unlocked: false,
+  queue: [],
+  playing: false,
+  currentAudio: null,
+  availability: new Map(),
+  lastApproachKey: "",
+  lastArrivedKey: "",
+  lastStatus: "待機中"
 };
 
 const DWELL_SECONDS = 3.2;
@@ -224,13 +244,15 @@ function stationIndexByCode(line, stationCode) {
 }
 
 function buildBaseState() {
-  const line = tramLines[ui.lineSelect.value];
+  const lineKey = ui.lineSelect.value;
+  const line = tramLines[lineKey];
   const currentIndex = stationIndexByCode(line, ui.currentStationSelect.value);
   const destinationIndex = stationIndexByCode(line, ui.destinationSelect.value);
   const direction = destinationIndex >= currentIndex ? 1 : -1;
   const nextIndex = currentIndex === destinationIndex ? currentIndex : currentIndex + direction;
 
   return {
+    lineKey,
     line,
     currentIndex,
     destinationIndex,
@@ -327,6 +349,210 @@ function applyAdaptiveNameSize(element, text) {
   }
 }
 
+function getAudioMode() {
+  return ui.audioModeSelect.value;
+}
+
+function getAudioVolume() {
+  return Math.max(0, Math.min(1, (Number(ui.audioVolumeRange.value) || 0) / 100));
+}
+
+function setAudioStatus(message) {
+  audioState.lastStatus = message;
+  ui.audioStatusValue.textContent = message;
+}
+
+function buildAudioAssetPath(lineKey, stationCode, kind) {
+  return `./assets/audio/stops/${lineKey}/${stationCode}_${kind}.mp3`;
+}
+
+function stopAudioPlayback() {
+  audioState.queue = [];
+  audioState.playing = false;
+
+  if (audioState.currentAudio) {
+    audioState.currentAudio.pause();
+    audioState.currentAudio = null;
+  }
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+}
+
+function playBrowserSpeech(text) {
+  return new Promise((resolve, reject) => {
+    if (!("speechSynthesis" in window)) {
+      reject(new Error("speechSynthesis unavailable"));
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "ja-JP";
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = getAudioVolume();
+    utterance.onend = () => resolve();
+    utterance.onerror = () => reject(new Error("speechSynthesis error"));
+    window.speechSynthesis.speak(utterance);
+  });
+}
+
+function playAudioFile(path) {
+  return new Promise((resolve, reject) => {
+    const audio = new Audio(path);
+    audio.preload = "auto";
+    audio.volume = getAudioVolume();
+    audioState.currentAudio = audio;
+
+    const cleanup = () => {
+      audio.onended = null;
+      audio.onerror = null;
+      if (audioState.currentAudio === audio) {
+        audioState.currentAudio = null;
+      }
+    };
+
+    audio.onended = () => {
+      cleanup();
+      resolve();
+    };
+
+    audio.onerror = () => {
+      cleanup();
+      reject(new Error(`audio load failed: ${path}`));
+    };
+
+    audio.play().catch((error) => {
+      cleanup();
+      reject(error);
+    });
+  });
+}
+
+function buildAnnouncementText(state, kind) {
+  const doorSpeech = doorSpeechMap[ui.doorSelect.value];
+
+  if (kind === "approach") {
+    return `まもなく、${state.next.jp}、${state.next.jp}です。The next stop is ${state.next.en}.`;
+  }
+
+  return `${state.current.jp}、${state.current.jp}です。${doorSpeech.jp} Arriving at ${state.current.en}. ${doorSpeech.en}`;
+}
+
+async function playAnnouncementItem(item) {
+  const mode = getAudioMode();
+
+  if (mode === "off") {
+    return;
+  }
+
+  if (mode === "speech") {
+    await playBrowserSpeech(item.text);
+    return;
+  }
+
+  const knownAsset = audioState.availability.get(item.path);
+
+  if (knownAsset === false) {
+    await playBrowserSpeech(item.text);
+    return;
+  }
+
+  try {
+    await playAudioFile(item.path);
+    audioState.availability.set(item.path, true);
+  } catch {
+    audioState.availability.set(item.path, false);
+    await playBrowserSpeech(item.text);
+  }
+}
+
+function processAudioQueue() {
+  if (audioState.playing || !audioState.unlocked) {
+    if (!audioState.unlocked && getAudioMode() !== "off") {
+      setAudioStatus("タップで音声開始");
+    }
+    return;
+  }
+
+  const item = audioState.queue.shift();
+
+  if (!item) {
+    if (getAudioMode() === "off") {
+      setAudioStatus("停止中");
+    } else {
+      setAudioStatus("待機中");
+    }
+    return;
+  }
+
+  audioState.playing = true;
+  setAudioStatus(item.kind === "approach" ? "接近放送中" : "到着放送中");
+
+  playAnnouncementItem(item)
+    .catch(() => {
+      setAudioStatus("音声失敗");
+    })
+    .finally(() => {
+      audioState.playing = false;
+      processAudioQueue();
+    });
+}
+
+function enqueueAnnouncement(item) {
+  if (getAudioMode() === "off") {
+    return;
+  }
+
+  audioState.queue.push(item);
+  processAudioQueue();
+}
+
+function maybeAnnounceStop(prevState, nextState) {
+  if (!nextState.motionEnabled || getAudioMode() === "off") {
+    return;
+  }
+
+  const approachKey = `${nextState.lineKey}:${nextState.next.code}`;
+  const arrivedKey = `${nextState.lineKey}:${nextState.current.code}`;
+
+  if (nextState.phase === "approach" && audioState.lastApproachKey !== approachKey) {
+    audioState.lastApproachKey = approachKey;
+    enqueueAnnouncement({
+      kind: "approach",
+      text: buildAnnouncementText(nextState, "approach"),
+      path: buildAudioAssetPath(nextState.lineKey, nextState.next.code, "approach")
+    });
+  }
+
+  const enteredArrived = nextState.phase === "arrived" && (!prevState || prevState.phase !== "arrived");
+
+  if (enteredArrived && audioState.lastArrivedKey !== arrivedKey) {
+    audioState.lastArrivedKey = arrivedKey;
+    enqueueAnnouncement({
+      kind: "arrived",
+      text: buildAnnouncementText(nextState, "arrived"),
+      path: buildAudioAssetPath(nextState.lineKey, nextState.current.code, "arrived")
+    });
+  }
+}
+
+function unlockAudioPlayback() {
+  if (audioState.unlocked) {
+    return;
+  }
+
+  audioState.unlocked = true;
+  if (getAudioMode() === "off") {
+    setAudioStatus("停止中");
+    return;
+  }
+
+  setAudioStatus("待機中");
+  processAudioQueue();
+}
+
 function fillRollTrack(element, text) {
   const unit = `${text}   ◆   `;
   element.textContent = unit.repeat(10);
@@ -403,6 +629,7 @@ function renderPanels(state) {
   ui.doorInfoEN.textContent = state.door.en;
   ui.speedValue.textContent = `${state.visualSpeed} km/h`;
   ui.phaseValue.textContent = phaseMap[state.phase] || "走行中";
+  ui.audioStatusValue.textContent = audioState.lastStatus;
   ui.crowdValue.textContent = state.crowd;
   ui.delayValue.textContent = state.delayMinutes > 0 ? `${state.delayMinutes}分遅れ` : "平常運転";
   ui.operatorValue.textContent = state.line.operator;
@@ -608,9 +835,30 @@ function syncDisplayMode() {
   }
 }
 
+function syncAudioMode() {
+  const mode = getAudioMode();
+
+  if (mode === "off") {
+    stopAudioPlayback();
+    setAudioStatus("停止中");
+    return;
+  }
+
+  if (!audioState.unlocked) {
+    setAudioStatus("タップで音声開始");
+    return;
+  }
+
+  setAudioStatus("待機中");
+  processAudioQueue();
+}
+
 function renderAll(forceTicker = false) {
+  const previousState = currentState;
   const state = buildState();
   currentState = state;
+
+  maybeAnnounceStop(previousState, state);
 
   renderHeader(state);
   renderPanels(state);
@@ -652,11 +900,15 @@ function randomizeState() {
 }
 
 function resetJourneyProgress() {
+  stopAudioPlayback();
   journey.segmentProgress = 0;
   journey.dwellRemaining = 0;
   journey.phase = "cruise";
   journey.moving = true;
   journey.lastTick = performance.now();
+  audioState.lastApproachKey = "";
+  audioState.lastArrivedKey = "";
+  syncAudioMode();
 }
 
 function advanceCurrentStation(baseState) {
@@ -751,6 +1003,7 @@ function initialize() {
   populateStationsForLine(false);
   setPage(0);
   syncDisplayMode();
+  syncAudioMode();
   resetJourneyProgress();
   formatClock();
   renderAll(true);
@@ -788,11 +1041,20 @@ ui.motionSelect.addEventListener("change", () => {
   resetJourneyProgress();
   renderAll(true);
 });
+ui.audioModeSelect.addEventListener("change", syncAudioMode);
+ui.audioVolumeRange.addEventListener("input", () => {
+  if (audioState.currentAudio) {
+    audioState.currentAudio.volume = getAudioVolume();
+  }
+});
 
 ui.displayModeSelect.addEventListener("change", syncDisplayMode);
 ui.pageSelect.addEventListener("change", () => setPage(Number(ui.pageSelect.value)));
 ui.nextPageButton.addEventListener("click", () => setPage(pageIndex + 1));
 ui.randomizeButton.addEventListener("click", randomizeState);
+
+window.addEventListener("pointerdown", unlockAudioPlayback, { once: true, passive: true });
+window.addEventListener("keydown", unlockAudioPlayback, { once: true });
 
 setInterval(formatClock, 1000);
 setInterval(() => {
