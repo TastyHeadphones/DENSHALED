@@ -35,11 +35,8 @@ Then open: `http://localhost:8000`
 This repository is configured to deploy automatically via GitHub Actions on every push to `main`.
 
 1. Push changes to `main`.
-2. Confirm the workflow `Deploy DENSHALED to gh-pages` succeeds.
-3. In GitHub repo settings, set **Pages** source to:
-   - `Deploy from a branch`
-   - Branch: `gh-pages`
-   - Folder: `/ (root)`
+2. In GitHub repo settings, set **Pages** source to **GitHub Actions**.
+3. Confirm the workflow `Deploy DENSHALED to GitHub Pages` succeeds.
 
 The workflow is defined in:
 
