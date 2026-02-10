@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="日本の列車LED表示器をイメージしたデモサイト。行先・種別・次駅・ドア情報を切り替えてトレインビジョン風表示を再現できます。"
+    />
+    <title>DENSHALED | Japanese Train LED Screen Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DotGothic16&family=IBM+Plex+Sans+JP:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="brand-block">
+        <div class="brand-logo">電</div>
+        <div class="brand-text">DENSHALED</div>
+      </div>
+      <nav class="header-nav" aria-label="Main navigation">
+        <a href="#top">TOP</a>
+        <a href="#simulator">SIMULATOR</a>
+        <a href="#patterns">PATTERNS</a>
+        <a href="#about">ABOUT</a>
+      </nav>
+    </header>
+
+    <main class="page-shell" id="top">
+      <article class="content-wrap">
+        <section class="content-main">
+          <div class="meta-row">
+            <span>2026.02.10</span>
+            <span>最終更新 2026.02.10</span>
+            <span>再現鉄 / Train Vision</span>
+          </div>
+
+          <h1>
+            「PowerPoint記事」風レイアウトで作る
+            <br />
+            日本列車LEDスクリーン再現サイト
+          </h1>
+
+          <hr />
+
+          <p class="intro">
+            FreedomTrainの記事デザインを参照し、淡いミント背景・角丸カード・タグ/CTAサイドバーの雰囲気を維持しながら、
+            実際に操作できる「日本の車内LED表示器デモ」を実装しています。
+          </p>
+
+          <div class="notice-box" role="note" aria-label="更新情報">
+            <strong>更新:</strong>
+            小田急・山手・京王・東横線をプリセット化。行先、種別、次駅、ドア案内を即時反映し、
+            スクロール案内文も自動更新します。
+          </div>
+
+          <section class="simulator" id="simulator">
+            <div class="section-head">
+              <h2>Train LED Simulator</h2>
+              <p>実機風の情報配置: 種別 / 行先 / 次駅 / ドア案内 / 列車番号 / スクロール告知</p>
+            </div>
+
+            <div class="led-board" id="ledBoard" aria-live="polite">
+              <div class="led-top-row">
+                <span class="line-chip" id="lineBadge">ODAKYU LINE</span>
+                <span class="train-chip" id="trainNumberDisplay">列車番号 1275E</span>
+                <time class="clock-chip" id="boardClock">00:00:00</time>
+              </div>
+
+              <div class="led-main-row">
+                <p class="jp-destination" id="destinationJP">各駅停車 新宿 ゆき</p>
+                <p class="en-destination"><span id="serviceEN">LOCAL</span> to <span id="destinationEN">Shinjuku</span></p>
+                <p class="next-station">
+                  つぎは <span id="nextStationJP">代々木上原</span>
+                  <span class="divider">/</span>
+                  Next <span id="nextStationEN">Yoyogi-Uehara</span>
+                </p>
+              </div>
+
+              <div class="led-door-row">
+                <p id="doorInfoJP">扉は右側です。</p>
+                <p id="doorInfoEN">Doors open on the right.</p>
+              </div>
+
+              <div class="led-scroll">
+                <span id="scrollText">まもなく次駅です。黄色い点字ブロックの内側でお待ちください。</span>
+              </div>
+            </div>
+
+            <form class="controls" id="controlForm" aria-label="LED表示コントロール">
+              <label>
+                路線
+                <select id="lineSelect" name="line"></select>
+              </label>
+
+              <label>
+                種別
+                <select id="serviceSelect" name="service">
+                  <option value="各駅停車">各駅停車</option>
+                  <option value="快速">快速</option>
+                  <option value="急行">急行</option>
+                  <option value="特急">特急</option>
+                </select>
+              </label>
+
+              <label>
+                行先
+                <select id="destinationSelect" name="destination"></select>
+              </label>
+
+              <label>
+                次駅
+                <select id="nextStationSelect" name="nextStation"></select>
+              </label>
+
+              <label>
+                ドア案内
+                <select id="doorSelect" name="door">
+                  <option value="right">右側が開きます</option>
+                  <option value="left">左側が開きます</option>
+                  <option value="both">両側が開きます</option>
+                </select>
+              </label>
+
+              <label>
+                列車番号
+                <input id="trainNumberInput" name="trainNumber" type="text" value="1275E" maxlength="8" />
+              </label>
+
+              <label class="wide">
+                任意スクロールメッセージ
+                <input
+                  id="customMessageInput"
+                  name="customMessage"
+                  type="text"
+                  placeholder="空欄の場合は自動メッセージ"
+                  maxlength="80"
+                />
+              </label>
+
+              <button type="button" id="randomizeButton">ランダム生成</button>
+            </form>
+          </section>
+
+          <section class="pattern-gallery" id="patterns">
+            <h2>LED Pattern Gallery</h2>
+            <div class="pattern-grid">
+              <article class="pattern-card">
+                <h3>停車駅案内モード</h3>
+                <div class="mini-led mini-blue">各駅停車 / LOCAL</div>
+                <p>駅名を大きく表示し、次駅案内を補助表示する標準レイアウト。</p>
+              </article>
+
+              <article class="pattern-card">
+                <h3>優等列車モード</h3>
+                <div class="mini-led mini-orange">急行 / EXPRESS</div>
+                <p>種別強調色を変更し、速達列車であることをひと目で伝達。</p>
+              </article>
+
+              <article class="pattern-card">
+                <h3>ドア案内モード</h3>
+                <div class="mini-led mini-green">扉は右側です。</div>
+                <p>停車直前にドア方向を固定表示して乗降動線を明確化。</p>
+              </article>
+            </div>
+          </section>
+
+          <section class="about" id="about">
+            <h2>About This Build</h2>
+            <p>
+              このサイトは静的ファイルのみで構成され、GitHub Pagesへ自動デプロイされます。
+              HTML/CSS/JavaScriptだけで、記事風レイアウトとLED表示アニメーションを両立しています。
+            </p>
+          </section>
+        </section>
+
+        <aside class="content-side">
+          <h3>詳細を見る</h3>
+          <div class="tag-list" aria-label="タグ">
+            <span>ソフトウェア</span>
+            <span>PowerPoint</span>
+            <span>Google スライド</span>
+            <span>Office</span>
+            <span>トレインビジョン</span>
+            <span>MSO</span>
+            <span>プレゼンテーション</span>
+            <span>Microsoft Office</span>
+            <span>Microsoft PowerPoint</span>
+          </div>
+
+          <a class="cta-button" href="#simulator">
+            <span>Official X</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </a>
+          <a class="cta-button" href="#patterns">
+            <span>Join us</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </a>
+          <a class="cta-button" href="#about">
+            <span>PRTT Official X</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </a>
+          <a class="cta-button" href="#top">
+            <span>Yagiri Discussion</span>
+            <span class="arrow" aria-hidden="true">›</span>
+          </a>
+        </aside>
+      </article>
+    </main>
+
+    <footer class="site-footer">
+      <p>DENSHALED - Japanese Train LED Screen Playground</p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
