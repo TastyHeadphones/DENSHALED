@@ -45,8 +45,13 @@
 
             <div class="head-main">
               <p class="head-kicker">行先 / Bound for</p>
-              <p class="destination-jp" id="destinationJP">早稲田</p>
-              <p class="destination-en" id="destinationEN">Waseda</p>
+              <div class="destination-window">
+                <p class="destination-jp roll-target" id="destinationJP">早稲田</p>
+                <p class="destination-en roll-target" id="destinationEN">Waseda</p>
+              </div>
+              <div class="lang-roll-window">
+                <div class="lang-roll-track" id="headRollTrack">早稲田 / Waseda</div>
+              </div>
             </div>
 
             <div class="head-meta">
@@ -60,16 +65,22 @@
             <div class="body-grid">
               <article class="panel next-panel">
                 <p class="panel-label">つぎは / Next</p>
-                <p class="panel-jp" id="nextStationJP">王子駅前</p>
-                <p class="panel-en" id="nextStationEN">Oji-ekimae</p>
+                <p class="panel-jp roll-target" id="nextStationJP">王子駅前</p>
+                <p class="panel-en roll-target" id="nextStationEN">Oji-ekimae</p>
                 <div class="station-code" id="nextStationCode">SA13</div>
+                <div class="lang-roll-window compact">
+                  <div class="lang-roll-track compact" id="nextRollTrack">次は 王子駅前 / Next Oji-ekimae</div>
+                </div>
               </article>
 
               <article class="panel current-panel">
                 <p class="panel-label">ただいま / Now</p>
-                <p class="panel-jp current-jp" id="currentStationJP">宮ノ前</p>
-                <p class="panel-en" id="currentStationEN">Miyanomae</p>
+                <p class="panel-jp current-jp roll-target" id="currentStationJP">宮ノ前</p>
+                <p class="panel-en roll-target" id="currentStationEN">Miyanomae</p>
                 <div class="station-code current-code" id="currentStationCode">SA10</div>
+                <div class="lang-roll-window compact">
+                  <div class="lang-roll-track compact" id="currentRollTrack">ただいま 宮ノ前 / Now Miyanomae</div>
+                </div>
               </article>
 
               <article class="panel status-panel">
@@ -82,6 +93,10 @@
                 <div class="status-row">
                   <span>速度</span>
                   <strong id="speedValue">35 km/h</strong>
+                </div>
+                <div class="status-row">
+                  <span>運行フェーズ</span>
+                  <strong id="phaseValue">走行中</strong>
                 </div>
                 <div class="status-row">
                   <span>混雑度</span>
@@ -118,6 +133,9 @@
           </section>
 
           <section class="lcd-foot">
+            <div class="motion-strip" id="motionStrip">
+              <div class="motion-track"></div>
+            </div>
             <div class="page-chip" id="pageChip">PAGE A | 停車案内</div>
             <div class="ticker-window">
               <span id="tickerText" class="ticker-text">
@@ -191,6 +209,19 @@
               <option value="auto" selected>自動切替</option>
               <option value="manual">手動</option>
             </select>
+          </label>
+
+          <label>
+            走行アニメーション
+            <select id="motionSelect" name="motion">
+              <option value="on" selected>有効</option>
+              <option value="off">停止</option>
+            </select>
+          </label>
+
+          <label>
+            駅間走行時間 (秒)
+            <input id="segmentDurationInput" name="segmentDuration" type="number" min="6" max="40" value="14" />
           </label>
 
           <label>

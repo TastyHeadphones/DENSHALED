@@ -77,6 +77,13 @@ const crowdMap = {
   high: "混雑"
 };
 
+const phaseMap = {
+  manual: "手動表示",
+  cruise: "走行中",
+  approach: "まもなく到着",
+  arrived: "停車中"
+};
+
 const pageCatalog = [
   { code: "A", label: "停車案内" },
   { code: "B", label: "路線図" },
@@ -95,6 +102,8 @@ const ui = {
   delayInput: document.getElementById("delayInput"),
   displayModeSelect: document.getElementById("displayModeSelect"),
   pageSelect: document.getElementById("pageSelect"),
+  motionSelect: document.getElementById("motionSelect"),
+  segmentDurationInput: document.getElementById("segmentDurationInput"),
   trainNumberInput: document.getElementById("trainNumberInput"),
   customMessageInput: document.getElementById("customMessageInput"),
   randomizeButton: document.getElementById("randomizeButton"),
@@ -103,18 +112,22 @@ const ui = {
   serviceBadgeEN: document.getElementById("serviceBadgeEN"),
   destinationJP: document.getElementById("destinationJP"),
   destinationEN: document.getElementById("destinationEN"),
+  headRollTrack: document.getElementById("headRollTrack"),
   lineNameEN: document.getElementById("lineNameEN"),
   trainNumberDisplay: document.getElementById("trainNumberDisplay"),
   clockDisplay: document.getElementById("clockDisplay"),
   nextStationJP: document.getElementById("nextStationJP"),
   nextStationEN: document.getElementById("nextStationEN"),
   nextStationCode: document.getElementById("nextStationCode"),
+  nextRollTrack: document.getElementById("nextRollTrack"),
   currentStationJP: document.getElementById("currentStationJP"),
   currentStationEN: document.getElementById("currentStationEN"),
   currentStationCode: document.getElementById("currentStationCode"),
+  currentRollTrack: document.getElementById("currentRollTrack"),
   doorInfoJP: document.getElementById("doorInfoJP"),
   doorInfoEN: document.getElementById("doorInfoEN"),
   speedValue: document.getElementById("speedValue"),
+  phaseValue: document.getElementById("phaseValue"),
   crowdValue: document.getElementById("crowdValue"),
   delayValue: document.getElementById("delayValue"),
   operatorValue: document.getElementById("operatorValue"),
@@ -127,10 +140,27 @@ const ui = {
   tickerText: document.getElementById("tickerText")
 };
 
+const journey = {
+  timer: null,
+  lastTick: 0,
+  segmentProgress: 0,
+  dwellRemaining: 0,
+  phase: "cruise",
+  moving: true
+};
+
+const DWELL_SECONDS = 3.2;
+
 let pageIndex = 0;
 let pageTimer = null;
 let tickerStep = 0;
 let currentState = null;
+let lastTickerMessage = "";
+let lastSignature = {
+  destination: "",
+  current: "",
+  next: ""
+};
 
 function createOption(value, label) {
   const option = document.createElement("option");
@@ -150,6 +180,7 @@ function formatClock() {
 
 function setupLineOptions() {
   ui.lineSelect.innerHTML = "";
+
   Object.entries(tramLines).forEach(([key, line]) => {
     ui.lineSelect.append(createOption(key, line.nameJP));
   });
@@ -187,37 +218,84 @@ function stationIndexByCode(line, stationCode) {
   return index >= 0 ? index : 0;
 }
 
-function buildState() {
+function buildBaseState() {
   const line = tramLines[ui.lineSelect.value];
   const currentIndex = stationIndexByCode(line, ui.currentStationSelect.value);
   const destinationIndex = stationIndexByCode(line, ui.destinationSelect.value);
   const direction = destinationIndex >= currentIndex ? 1 : -1;
   const nextIndex = currentIndex === destinationIndex ? currentIndex : currentIndex + direction;
-  const current = line.stations[currentIndex];
-  const next = line.stations[nextIndex];
-  const destination = line.stations[destinationIndex];
-  const service = serviceMap[ui.serviceSelect.value];
-  const door = doorMap[ui.doorSelect.value];
-  const speed = Number(ui.speedRange.value) || 0;
-  const delayMinutes = Math.max(0, Number(ui.delayInput.value) || 0);
 
   return {
     line,
-    current,
-    next,
-    destination,
     currentIndex,
-    nextIndex,
     destinationIndex,
     direction,
-    service,
-    door,
-    speed,
+    nextIndex,
+    current: line.stations[currentIndex],
+    next: line.stations[nextIndex],
+    destination: line.stations[destinationIndex],
+    service: serviceMap[ui.serviceSelect.value],
+    door: doorMap[ui.doorSelect.value],
+    speedSetting: Number(ui.speedRange.value) || 35,
     crowd: crowdMap[ui.crowdSelect.value],
-    delayMinutes,
+    delayMinutes: Math.max(0, Number(ui.delayInput.value) || 0),
     trainNumber: (ui.trainNumberInput.value.trim().toUpperCase() || "A124").replace(/[^A-Z0-9-]/g, ""),
     customMessage: ui.customMessageInput.value.trim()
   };
+}
+
+function computeMotionSpeed(speedSetting, segmentProgress, phase) {
+  const cruise = Math.max(18, speedSetting);
+
+  if (phase === "arrived" || phase === "manual") {
+    return 0;
+  }
+
+  if (phase === "approach") {
+    const t = Math.max(0, Math.min(1, (segmentProgress - 0.74) / 0.26));
+    return Math.max(4, Math.round(cruise * (1 - 0.9 * t)));
+  }
+
+  const accel = Math.min(1, segmentProgress / 0.35);
+  const eased = 0.35 + 0.65 * (1 - Math.pow(1 - accel, 2));
+  return Math.round(cruise * eased);
+}
+
+function buildState() {
+  const base = buildBaseState();
+  const motionEnabled = ui.motionSelect.value === "on";
+
+  const state = {
+    ...base,
+    motionEnabled,
+    phase: motionEnabled ? journey.phase : "manual",
+    moving: motionEnabled ? journey.moving : false
+  };
+
+  if (motionEnabled && base.currentIndex !== base.destinationIndex && journey.dwellRemaining <= 0) {
+    state.motionAbsoluteIndex = base.currentIndex + base.direction * journey.segmentProgress;
+  } else {
+    state.motionAbsoluteIndex = base.currentIndex;
+  }
+
+  state.visualSpeed = motionEnabled
+    ? computeMotionSpeed(base.speedSetting, journey.segmentProgress, state.phase)
+    : base.speedSetting;
+
+  return state;
+}
+
+function fillRollTrack(element, text) {
+  const unit = `${text}   ◆   `;
+  element.textContent = unit.repeat(10);
+}
+
+function triggerRollAnimation(...elements) {
+  elements.forEach((element) => {
+    element.classList.remove("roll-enter");
+    void element.offsetWidth;
+    element.classList.add("roll-enter");
+  });
 }
 
 function renderHeader(state) {
@@ -226,52 +304,87 @@ function renderHeader(state) {
 
   ui.serviceBadgeJP.textContent = state.service.jp;
   ui.serviceBadgeEN.textContent = state.service.en;
-  ui.destinationJP.textContent = `${state.destination.jp}`;
+  ui.destinationJP.textContent = state.destination.jp;
   ui.destinationEN.textContent = state.destination.en;
   ui.lineNameEN.textContent = state.line.nameEN;
   ui.trainNumberDisplay.textContent = `TRAM ${state.trainNumber}`;
+
+  fillRollTrack(ui.headRollTrack, `${state.service.jp} ${state.destination.jp} / ${state.service.en} ${state.destination.en}`);
+
+  const destinationSignature = `${state.service.jp}-${state.destination.code}`;
+
+  if (destinationSignature !== lastSignature.destination) {
+    triggerRollAnimation(ui.destinationJP, ui.destinationEN);
+    lastSignature.destination = destinationSignature;
+  }
 }
 
 function renderPanels(state) {
+  ui.tramDisplay.dataset.travel = state.phase;
+  ui.tramDisplay.dataset.moving = String(state.moving);
+
   ui.nextStationJP.textContent = state.next.jp;
   ui.nextStationEN.textContent = state.next.en;
   ui.nextStationCode.textContent = state.next.code;
+  fillRollTrack(ui.nextRollTrack, `次は ${state.next.jp} / Next ${state.next.en}`);
 
   ui.currentStationJP.textContent = state.current.jp;
   ui.currentStationEN.textContent = state.current.en;
   ui.currentStationCode.textContent = state.current.code;
+  fillRollTrack(ui.currentRollTrack, `ただいま ${state.current.jp} / Now ${state.current.en}`);
 
   ui.doorInfoJP.textContent = state.door.jp;
   ui.doorInfoEN.textContent = state.door.en;
-  ui.speedValue.textContent = `${state.speed} km/h`;
+  ui.speedValue.textContent = `${state.visualSpeed} km/h`;
+  ui.phaseValue.textContent = phaseMap[state.phase] || "走行中";
   ui.crowdValue.textContent = state.crowd;
   ui.delayValue.textContent = state.delayMinutes > 0 ? `${state.delayMinutes}分遅れ` : "平常運転";
   ui.operatorValue.textContent = state.line.operator;
 
   ui.directionJP.textContent = `${state.destination.jp} 方面`;
   ui.directionEN.textContent = `bound for ${state.destination.en}`;
+
+  if (state.current.code !== lastSignature.current) {
+    triggerRollAnimation(ui.currentStationJP, ui.currentStationEN);
+    lastSignature.current = state.current.code;
+  }
+
+  if (state.next.code !== lastSignature.next) {
+    triggerRollAnimation(ui.nextStationJP, ui.nextStationEN);
+    lastSignature.next = state.next.code;
+  }
 }
 
 function stationClass(state, index) {
+  const classes = [];
   const min = Math.min(state.currentIndex, state.destinationIndex);
   const max = Math.max(state.currentIndex, state.destinationIndex);
   const inside = index >= min && index <= max;
 
   if (!inside) {
-    return "is-outside";
+    classes.push("is-outside");
+    return classes.join(" ");
   }
 
   if (index === state.currentIndex) {
-    return "is-current";
+    classes.push("is-current");
   }
 
   if (index === state.nextIndex && state.currentIndex !== state.destinationIndex) {
-    return "is-next";
+    classes.push("is-next");
+
+    if (state.phase === "approach") {
+      classes.push("is-nearing");
+    }
   }
 
-  const isPassed = (state.direction === 1 && index < state.currentIndex) || (state.direction === -1 && index > state.currentIndex);
+  const passed = (state.direction === 1 && index < state.currentIndex) || (state.direction === -1 && index > state.currentIndex);
 
-  return isPassed ? "is-passed" : "is-future";
+  if (passed) {
+    classes.push("is-passed");
+  }
+
+  return classes.join(" ");
 }
 
 function renderRouteStations(state) {
@@ -297,8 +410,9 @@ function renderRouteStations(state) {
     ui.routeStations.append(node);
   });
 
-  const progress = state.line.stations.length > 1 ? (state.currentIndex / (state.line.stations.length - 1)) * 100 : 0;
-  ui.routeProgress.style.width = `calc((100% - 3rem) * ${progress / 100})`;
+  const upper = state.line.stations.length - 1;
+  const normalized = upper > 0 ? Math.max(0, Math.min(upper, state.motionAbsoluteIndex)) / upper : 0;
+  ui.routeProgress.style.width = `calc((100% - 3rem) * ${normalized})`;
 }
 
 function renderNotices(state) {
@@ -324,11 +438,18 @@ function renderNotices(state) {
       .map((station) => `${station.jp}${station.transfers.length ? ` [${station.transfers.join("/")}]` : ""}`)
       .join(" → ") || "案内対象の停車駅はありません";
 
+  const phaseMessage =
+    state.phase === "approach"
+      ? `まもなく ${state.next.jp} に到着します。`
+      : state.phase === "arrived"
+        ? `${state.current.jp} に停車中です。ドア付近の混雑にご注意ください。`
+        : `${state.next.jp} に向けて走行中です。`;
+
   const messages = [
     `次駅: ${state.next.jp} (${state.next.en}) / ${state.door.jp}`,
     `この先の停車案内: ${upcomingText}`,
     `運行状況: ${state.delayMinutes > 0 ? `${state.delayMinutes}分程度の遅れで運行中` : "平常通り運転しています"}`,
-    `乗務案内: ワンマン運転です。発車時はつり革・手すりをお持ちください。`
+    `案内: ${phaseMessage}`
   ];
 
   ui.noticeList.innerHTML = "";
@@ -340,8 +461,15 @@ function renderNotices(state) {
 }
 
 function buildTickerMessages(state) {
+  const phaseLine =
+    state.phase === "approach"
+      ? `まもなく ${state.next.jp}、${state.door.jp}。`
+      : state.phase === "arrived"
+        ? `${state.current.jp}です。お降りの方は足元にご注意ください。`
+        : `${state.line.nameJP} ${state.service.jp} ${state.destination.jp}ゆきです。`;
+
   return [
-    `${state.line.nameJP} ${state.service.jp} ${state.destination.jp}ゆきです。`,
+    phaseLine,
     `Next stop is ${state.next.en}. ${state.door.en}.`,
     state.delayMinutes > 0
       ? `現在、${state.delayMinutes}分程度の遅れで運転しております。`
@@ -350,10 +478,15 @@ function buildTickerMessages(state) {
   ];
 }
 
-function renderTicker(state) {
+function renderTicker(state, force = false) {
   const defaults = buildTickerMessages(state);
   const message = state.customMessage || defaults[(tickerStep + pageIndex) % defaults.length];
 
+  if (!force && message === lastTickerMessage) {
+    return;
+  }
+
+  lastTickerMessage = message;
   ui.tickerText.textContent = message;
   ui.tickerText.classList.remove("animate");
   void ui.tickerText.offsetWidth;
@@ -369,7 +502,7 @@ function setPage(nextPage) {
   ui.pageChip.textContent = `PAGE ${pageCatalog[pageIndex].code} | ${pageCatalog[pageIndex].label}`;
 
   if (currentState) {
-    renderTicker(currentState);
+    renderTicker(currentState, true);
   }
 }
 
@@ -393,7 +526,7 @@ function syncDisplayMode() {
   }
 }
 
-function renderAll() {
+function renderAll(forceTicker = false) {
   const state = buildState();
   currentState = state;
 
@@ -401,7 +534,7 @@ function renderAll() {
   renderPanels(state);
   renderRouteStations(state);
   renderNotices(state);
-  renderTicker(state);
+  renderTicker(state, forceTicker);
 }
 
 function randomItem(list) {
@@ -428,10 +561,107 @@ function randomizeState() {
   ui.crowdSelect.value = randomItem(Object.keys(crowdMap));
   ui.speedRange.value = String(Math.floor(Math.random() * 65));
   ui.delayInput.value = String(Math.floor(Math.random() * 7));
+  ui.segmentDurationInput.value = String(10 + Math.floor(Math.random() * 10));
   ui.trainNumberInput.value = `${String.fromCharCode(65 + Math.floor(Math.random() * 3))}${100 + Math.floor(Math.random() * 900)}`;
   ui.customMessageInput.value = "";
 
+  resetJourneyProgress();
+  renderAll(true);
+}
+
+function resetJourneyProgress() {
+  journey.segmentProgress = 0;
+  journey.dwellRemaining = 0;
+  journey.phase = "cruise";
+  journey.moving = true;
+  journey.lastTick = performance.now();
+}
+
+function advanceCurrentStation(baseState) {
+  if (baseState.currentIndex === baseState.destinationIndex) {
+    return false;
+  }
+
+  const line = baseState.line;
+  const nextIndex = baseState.currentIndex + baseState.direction;
+  ui.currentStationSelect.value = line.stations[nextIndex].code;
+
+  if (nextIndex === baseState.destinationIndex && line.stations.length > 1) {
+    if (nextIndex === 0) {
+      ui.destinationSelect.value = line.stations[line.stations.length - 1].code;
+    }
+
+    if (nextIndex === line.stations.length - 1) {
+      ui.destinationSelect.value = line.stations[0].code;
+    }
+  }
+
+  return true;
+}
+
+function tickJourney() {
+  const motionEnabled = ui.motionSelect.value === "on";
+  const now = performance.now();
+  const delta = journey.lastTick ? (now - journey.lastTick) / 1000 : 0.12;
+  journey.lastTick = now;
+
+  if (!motionEnabled) {
+    journey.phase = "manual";
+    journey.moving = false;
+    journey.segmentProgress = 0;
+    journey.dwellRemaining = 0;
+    renderAll();
+    return;
+  }
+
+  const baseState = buildBaseState();
+
+  if (baseState.currentIndex === baseState.destinationIndex) {
+    journey.phase = "arrived";
+    journey.moving = false;
+    journey.segmentProgress = 0;
+    renderAll();
+    return;
+  }
+
+  if (journey.dwellRemaining > 0) {
+    journey.dwellRemaining = Math.max(0, journey.dwellRemaining - delta);
+    journey.phase = "arrived";
+    journey.moving = false;
+
+    if (journey.dwellRemaining === 0) {
+      journey.phase = "cruise";
+      journey.moving = true;
+      journey.segmentProgress = 0;
+    }
+
+    renderAll();
+    return;
+  }
+
+  const segmentSeconds = Math.max(6, Math.min(40, Number(ui.segmentDurationInput.value) || 14));
+  journey.segmentProgress = Math.min(1, journey.segmentProgress + delta / segmentSeconds);
+  journey.phase = journey.segmentProgress >= 0.74 ? "approach" : "cruise";
+  journey.moving = true;
+
+  if (journey.segmentProgress >= 1) {
+    const moved = advanceCurrentStation(baseState);
+    journey.segmentProgress = 0;
+    journey.dwellRemaining = moved ? DWELL_SECONDS : 0;
+    journey.phase = "arrived";
+    journey.moving = false;
+  }
+
   renderAll();
+}
+
+function startJourneyLoop() {
+  if (journey.timer) {
+    clearInterval(journey.timer);
+  }
+
+  journey.lastTick = performance.now();
+  journey.timer = setInterval(tickJourney, 120);
 }
 
 function initialize() {
@@ -439,19 +669,27 @@ function initialize() {
   populateStationsForLine(false);
   setPage(0);
   syncDisplayMode();
+  resetJourneyProgress();
   formatClock();
-  renderAll();
+  renderAll(true);
+  startJourneyLoop();
 }
 
 ui.lineSelect.addEventListener("change", () => {
   populateStationsForLine(true);
-  renderAll();
+  resetJourneyProgress();
+  renderAll(true);
+});
+
+[ui.currentStationSelect, ui.destinationSelect].forEach((element) => {
+  element.addEventListener("change", () => {
+    resetJourneyProgress();
+    renderAll(true);
+  });
 });
 
 [
   ui.serviceSelect,
-  ui.currentStationSelect,
-  ui.destinationSelect,
   ui.doorSelect,
   ui.crowdSelect,
   ui.speedRange,
@@ -459,8 +697,14 @@ ui.lineSelect.addEventListener("change", () => {
   ui.trainNumberInput,
   ui.customMessageInput
 ].forEach((element) => {
-  element.addEventListener("input", renderAll);
-  element.addEventListener("change", renderAll);
+  element.addEventListener("input", () => renderAll(false));
+  element.addEventListener("change", () => renderAll(false));
+});
+
+ui.segmentDurationInput.addEventListener("change", resetJourneyProgress);
+ui.motionSelect.addEventListener("change", () => {
+  resetJourneyProgress();
+  renderAll(true);
 });
 
 ui.displayModeSelect.addEventListener("change", syncDisplayMode);
@@ -471,8 +715,9 @@ ui.randomizeButton.addEventListener("click", randomizeState);
 setInterval(formatClock, 1000);
 setInterval(() => {
   tickerStep += 1;
+
   if (currentState) {
-    renderTicker(currentState);
+    renderTicker(currentState, true);
   }
 }, 5200);
 
