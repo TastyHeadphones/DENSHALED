@@ -6,15 +6,15 @@ const tramLines = {
     color: "#168ddf",
     accent: "#d13a58",
     stations: [
-      { code: "SA01", jp: "三ノ輪橋", en: "Minowabashi", transfers: ["H"] },
-      { code: "SA03", jp: "荒川区役所前", en: "Arakawa-kuyakushomae", transfers: [] },
-      { code: "SA07", jp: "熊野前", en: "Kumanomae", transfers: ["NT"] },
-      { code: "SA10", jp: "宮ノ前", en: "Miyanomae", transfers: [] },
-      { code: "SA13", jp: "王子駅前", en: "Oji-ekimae", transfers: ["JR", "N"] },
-      { code: "SA16", jp: "庚申塚", en: "Koshinzuka", transfers: [] },
-      { code: "SA19", jp: "大塚駅前", en: "Otsuka-ekimae", transfers: ["JR"] },
-      { code: "SA23", jp: "東池袋四丁目", en: "Higashi-ikebukuro-yonchome", transfers: ["Y"] },
-      { code: "SA30", jp: "早稲田", en: "Waseda", transfers: ["T"] }
+      { code: "SA01", jp: "三ノ輪橋", hira: "みのわばし", en: "Minowabashi", transfers: ["H"] },
+      { code: "SA03", jp: "荒川区役所前", hira: "あらかわくやくしょまえ", en: "Arakawa-kuyakushomae", transfers: [] },
+      { code: "SA07", jp: "熊野前", hira: "くまのまえ", en: "Kumanomae", transfers: ["NT"] },
+      { code: "SA10", jp: "宮ノ前", hira: "みやのまえ", en: "Miyanomae", transfers: [] },
+      { code: "SA13", jp: "王子駅前", hira: "おうじえきまえ", en: "Oji-ekimae", transfers: ["JR", "N"] },
+      { code: "SA16", jp: "庚申塚", hira: "こうしんづか", en: "Koshinzuka", transfers: [] },
+      { code: "SA19", jp: "大塚駅前", hira: "おおつかえきまえ", en: "Otsuka-ekimae", transfers: ["JR"] },
+      { code: "SA23", jp: "東池袋四丁目", hira: "ひがしいけぶくろよんちょうめ", en: "Higashi-ikebukuro-yonchome", transfers: ["Y"] },
+      { code: "SA30", jp: "早稲田", hira: "わせだ", en: "Waseda", transfers: ["T"] }
     ]
   },
   hiroden: {
@@ -24,16 +24,16 @@ const tramLines = {
     color: "#00a870",
     accent: "#e74e37",
     stations: [
-      { code: "HI01", jp: "広島駅", en: "Hiroshima Station", transfers: ["JR", "S"] },
-      { code: "HI02", jp: "猿猴橋町", en: "Enkobashicho", transfers: [] },
-      { code: "HI03", jp: "的場町", en: "Matobacho", transfers: ["5"] },
-      { code: "HI04", jp: "稲荷町", en: "Inarimachi", transfers: [] },
-      { code: "HI05", jp: "銀山町", en: "Kanayamacho", transfers: [] },
-      { code: "HI06", jp: "八丁堀", en: "Hatchobori", transfers: ["A", "B"] },
-      { code: "HI07", jp: "立町", en: "Tatemachi", transfers: [] },
-      { code: "HI08", jp: "紙屋町東", en: "Kamiyacho-higashi", transfers: ["A", "B"] },
-      { code: "HI09", jp: "原爆ドーム前", en: "Genbaku Dome-mae", transfers: ["BRT"] },
-      { code: "HI10", jp: "広電西広島", en: "Hiroden Nishi-Hiroshima", transfers: ["JR"] }
+      { code: "HI01", jp: "広島駅", hira: "ひろしまえき", en: "Hiroshima Station", transfers: ["JR", "S"] },
+      { code: "HI02", jp: "猿猴橋町", hira: "えんこうばしちょう", en: "Enkobashicho", transfers: [] },
+      { code: "HI03", jp: "的場町", hira: "まとばちょう", en: "Matobacho", transfers: ["5"] },
+      { code: "HI04", jp: "稲荷町", hira: "いなりまち", en: "Inarimachi", transfers: [] },
+      { code: "HI05", jp: "銀山町", hira: "かなやまちょう", en: "Kanayamacho", transfers: [] },
+      { code: "HI06", jp: "八丁堀", hira: "はっちょうぼり", en: "Hatchobori", transfers: ["A", "B"] },
+      { code: "HI07", jp: "立町", hira: "たてまち", en: "Tatemachi", transfers: [] },
+      { code: "HI08", jp: "紙屋町東", hira: "かみやちょうひがし", en: "Kamiyacho-higashi", transfers: ["A", "B"] },
+      { code: "HI09", jp: "原爆ドーム前", hira: "げんばくドームまえ", en: "Genbaku Dome-mae", transfers: ["BRT"] },
+      { code: "HI10", jp: "広電西広島", hira: "ひろでんにしひろしま", en: "Hiroden Nishi-Hiroshima", transfers: ["JR"] }
     ]
   },
   lightline: {
@@ -43,17 +43,17 @@ const tramLines = {
     color: "#f5be22",
     accent: "#f08a00",
     stations: [
-      { code: "UL01", jp: "宇都宮駅東口", en: "Utsunomiya East", transfers: ["JR"] },
-      { code: "UL02", jp: "東宿郷", en: "Higashi-Shukugo", transfers: [] },
-      { code: "UL03", jp: "駅東公園前", en: "Ekihigashi Park", transfers: [] },
-      { code: "UL04", jp: "峰", en: "Mine", transfers: [] },
-      { code: "UL05", jp: "宇都宮大学陽東キャンパス", en: "Yoto Campus", transfers: ["U"] },
-      { code: "UL06", jp: "平石", en: "Hiraishi", transfers: ["Depot"] },
-      { code: "UL07", jp: "飛山城跡", en: "Tobiyama Castle", transfers: [] },
-      { code: "UL08", jp: "清原地区市民センター前", en: "Kiyohara Civic Center", transfers: [] },
-      { code: "UL09", jp: "清陵高校前", en: "Seiryo HS", transfers: [] },
-      { code: "UL10", jp: "芳賀台", en: "Hagadai", transfers: ["Ind"] },
-      { code: "UL11", jp: "芳賀・高根沢工業団地", en: "Haga-Takanezawa", transfers: ["Tech"] }
+      { code: "UL01", jp: "宇都宮駅東口", hira: "うつのみやえきひがしぐち", en: "Utsunomiya East", transfers: ["JR"] },
+      { code: "UL02", jp: "東宿郷", hira: "ひがししゅくごう", en: "Higashi-Shukugo", transfers: [] },
+      { code: "UL03", jp: "駅東公園前", hira: "えきひがしこうえんまえ", en: "Ekihigashi Park", transfers: [] },
+      { code: "UL04", jp: "峰", hira: "みね", en: "Mine", transfers: [] },
+      { code: "UL05", jp: "宇都宮大学陽東キャンパス", hira: "うつのみやだいがくようとうキャンパス", en: "Yoto Campus", transfers: ["U"] },
+      { code: "UL06", jp: "平石", hira: "ひらいし", en: "Hiraishi", transfers: ["Depot"] },
+      { code: "UL07", jp: "飛山城跡", hira: "とびやまじょうあと", en: "Tobiyama Castle", transfers: [] },
+      { code: "UL08", jp: "清原地区市民センター前", hira: "きよはらちくしみんセンターまえ", en: "Kiyohara Civic Center", transfers: [] },
+      { code: "UL09", jp: "清陵高校前", hira: "せいりょうこうこうまえ", en: "Seiryo HS", transfers: [] },
+      { code: "UL10", jp: "芳賀台", hira: "はがだい", en: "Hagadai", transfers: ["Ind"] },
+      { code: "UL11", jp: "芳賀・高根沢工業団地", hira: "はが・たかねざわこうぎょうだんち", en: "Haga-Takanezawa", transfers: ["Tech"] }
     ]
   }
 };
@@ -137,7 +137,11 @@ const ui = {
   routeStations: document.getElementById("routeStations"),
   noticeList: document.getElementById("noticeList"),
   pageChip: document.getElementById("pageChip"),
-  tickerText: document.getElementById("tickerText")
+  tickerText: document.getElementById("tickerText"),
+  lcdBody: document.querySelector(".lcd-body"),
+  nextPanelLabel: document.getElementById("nextPanelLabel"),
+  currentPanelLabel: document.getElementById("currentPanelLabel"),
+  doorIndicator: document.getElementById("doorIndicator")
 };
 
 const journey = {
@@ -154,6 +158,7 @@ const DWELL_SECONDS = 3.2;
 let pageIndex = 0;
 let pageTimer = null;
 let tickerStep = 0;
+let languageStep = 0;
 let currentState = null;
 let lastTickerMessage = "";
 let lastSignature = {
@@ -285,6 +290,43 @@ function buildState() {
   return state;
 }
 
+function currentLangMode() {
+  return ["jp", "hira", "en"][languageStep % 3];
+}
+
+function stationNameByMode(station, mode) {
+  if (mode === "hira") {
+    return station.hira || station.jp;
+  }
+
+  if (mode === "en") {
+    return station.en;
+  }
+
+  return station.jp;
+}
+
+function stationSecondaryByMode(station, mode) {
+  if (mode === "en") {
+    return station.jp;
+  }
+
+  return station.en;
+}
+
+function applyAdaptiveNameSize(element, text) {
+  element.classList.remove("is-long", "is-extra-long");
+
+  if (text.length >= 12) {
+    element.classList.add("is-extra-long");
+    return;
+  }
+
+  if (text.length >= 8) {
+    element.classList.add("is-long");
+  }
+}
+
 function fillRollTrack(element, text) {
   const unit = `${text}   ◆   `;
   element.textContent = unit.repeat(10);
@@ -299,19 +341,27 @@ function triggerRollAnimation(...elements) {
 }
 
 function renderHeader(state) {
+  const mode = currentLangMode();
+  const destinationPrimary = stationNameByMode(state.destination, mode);
+  const destinationSecondary = stationSecondaryByMode(state.destination, mode);
+
   ui.tramDisplay.style.setProperty("--line-color", state.line.color);
   ui.tramDisplay.style.setProperty("--line-accent", state.line.accent);
 
   ui.serviceBadgeJP.textContent = state.service.jp;
   ui.serviceBadgeEN.textContent = state.service.en;
-  ui.destinationJP.textContent = state.destination.jp;
-  ui.destinationEN.textContent = state.destination.en;
+  ui.destinationJP.textContent = destinationPrimary;
+  ui.destinationEN.textContent = destinationSecondary;
   ui.lineNameEN.textContent = state.line.nameEN;
   ui.trainNumberDisplay.textContent = `TRAM ${state.trainNumber}`;
+  applyAdaptiveNameSize(ui.destinationJP, destinationPrimary);
 
-  fillRollTrack(ui.headRollTrack, `${state.service.jp} ${state.destination.jp} / ${state.service.en} ${state.destination.en}`);
+  fillRollTrack(
+    ui.headRollTrack,
+    `${state.service.jp} ${state.destination.jp} (${state.destination.hira}) / ${state.service.en} ${state.destination.en}`
+  );
 
-  const destinationSignature = `${state.service.jp}-${state.destination.code}`;
+  const destinationSignature = `${state.service.jp}-${state.destination.code}-${mode}`;
 
   if (destinationSignature !== lastSignature.destination) {
     triggerRollAnimation(ui.destinationJP, ui.destinationEN);
@@ -320,18 +370,34 @@ function renderHeader(state) {
 }
 
 function renderPanels(state) {
+  const mode = currentLangMode();
+  const nextPrimary = stationNameByMode(state.next, mode);
+  const nextSecondary = stationSecondaryByMode(state.next, mode);
+  const currentPrimary = stationNameByMode(state.current, mode);
+  const currentSecondary = stationSecondaryByMode(state.current, mode);
+
   ui.tramDisplay.dataset.travel = state.phase;
   ui.tramDisplay.dataset.moving = String(state.moving);
+  ui.nextPanelLabel.textContent = state.phase === "approach" ? "まもなく / Approaching" : "つぎは / Next";
+  ui.currentPanelLabel.textContent = state.phase === "arrived" ? "ただいま / Now at" : "ただいま / Now";
 
-  ui.nextStationJP.textContent = state.next.jp;
-  ui.nextStationEN.textContent = state.next.en;
+  ui.nextStationJP.textContent = nextPrimary;
+  ui.nextStationEN.textContent = nextSecondary;
   ui.nextStationCode.textContent = state.next.code;
-  fillRollTrack(ui.nextRollTrack, `次は ${state.next.jp} / Next ${state.next.en}`);
+  applyAdaptiveNameSize(ui.nextStationJP, nextPrimary);
+  fillRollTrack(
+    ui.nextRollTrack,
+    `次は ${state.next.jp} (${state.next.hira}) / Next ${state.next.en}`
+  );
 
-  ui.currentStationJP.textContent = state.current.jp;
-  ui.currentStationEN.textContent = state.current.en;
+  ui.currentStationJP.textContent = currentPrimary;
+  ui.currentStationEN.textContent = currentSecondary;
   ui.currentStationCode.textContent = state.current.code;
-  fillRollTrack(ui.currentRollTrack, `ただいま ${state.current.jp} / Now ${state.current.en}`);
+  applyAdaptiveNameSize(ui.currentStationJP, currentPrimary);
+  fillRollTrack(
+    ui.currentRollTrack,
+    `ただいま ${state.current.jp} (${state.current.hira}) / Now ${state.current.en}`
+  );
 
   ui.doorInfoJP.textContent = state.door.jp;
   ui.doorInfoEN.textContent = state.door.en;
@@ -341,17 +407,26 @@ function renderPanels(state) {
   ui.delayValue.textContent = state.delayMinutes > 0 ? `${state.delayMinutes}分遅れ` : "平常運転";
   ui.operatorValue.textContent = state.line.operator;
 
+  ui.doorIndicator.classList.remove("left-open", "right-open", "both-open");
+  if (ui.doorSelect.value === "left") {
+    ui.doorIndicator.classList.add("left-open");
+  } else if (ui.doorSelect.value === "right") {
+    ui.doorIndicator.classList.add("right-open");
+  } else {
+    ui.doorIndicator.classList.add("both-open");
+  }
+
   ui.directionJP.textContent = `${state.destination.jp} 方面`;
   ui.directionEN.textContent = `bound for ${state.destination.en}`;
 
-  if (state.current.code !== lastSignature.current) {
+  if (`${state.current.code}-${mode}` !== lastSignature.current) {
     triggerRollAnimation(ui.currentStationJP, ui.currentStationEN);
-    lastSignature.current = state.current.code;
+    lastSignature.current = `${state.current.code}-${mode}`;
   }
 
-  if (state.next.code !== lastSignature.next) {
+  if (`${state.next.code}-${mode}` !== lastSignature.next) {
     triggerRollAnimation(ui.nextStationJP, ui.nextStationEN);
-    lastSignature.next = state.next.code;
+    lastSignature.next = `${state.next.code}-${mode}`;
   }
 }
 
@@ -463,9 +538,9 @@ function renderNotices(state) {
 function buildTickerMessages(state) {
   const phaseLine =
     state.phase === "approach"
-      ? `まもなく ${state.next.jp}、${state.door.jp}。`
+      ? `まもなく ${state.next.jp}（${state.next.hira}）、${state.door.jp}。`
       : state.phase === "arrived"
-        ? `${state.current.jp}です。お降りの方は足元にご注意ください。`
+        ? `${state.current.jp}（${state.current.hira}）です。お降りの方は足元にご注意ください。`
         : `${state.line.nameJP} ${state.service.jp} ${state.destination.jp}ゆきです。`;
 
   return [
@@ -500,6 +575,13 @@ function setPage(nextPage) {
   ui.tramDisplay.dataset.page = String(pageIndex);
   ui.pageSelect.value = String(pageIndex);
   ui.pageChip.textContent = `PAGE ${pageCatalog[pageIndex].code} | ${pageCatalog[pageIndex].label}`;
+  ui.lcdBody.classList.remove("page-switch");
+  void ui.lcdBody.offsetWidth;
+  ui.lcdBody.classList.add("page-switch");
+
+  setTimeout(() => {
+    ui.lcdBody.classList.remove("page-switch");
+  }, 420);
 
   if (currentState) {
     renderTicker(currentState, true);
@@ -720,5 +802,13 @@ setInterval(() => {
     renderTicker(currentState, true);
   }
 }, 5200);
+
+setInterval(() => {
+  languageStep = (languageStep + 1) % 3;
+
+  if (currentState) {
+    renderAll(false);
+  }
+}, 3200);
 
 initialize();

@@ -111,12 +111,32 @@ h1 {
 }
 
 .tram-lcd {
+  position: relative;
   border-radius: 1.2rem;
   overflow: hidden;
   background: #e8edf2;
   color: var(--ink);
   box-shadow: var(--shadow);
   border: 1px solid #95a9bc;
+}
+
+.tram-lcd::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(138, 200, 243, 0.16), rgba(255, 255, 255, 0)),
+    repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0 2px, rgba(255, 255, 255, 0) 2px 4px);
+  transform: translateY(-102%);
+  animation: monitorSweep 8s linear infinite;
+  z-index: 5;
+}
+
+@keyframes monitorSweep {
+  to {
+    transform: translateY(102%);
+  }
 }
 
 .lcd-head {
@@ -281,6 +301,22 @@ h1 {
   background: #f6f8fb;
 }
 
+.lcd-body.page-switch {
+  animation: pageSwitch 380ms ease-out;
+}
+
+@keyframes pageSwitch {
+  0% {
+    opacity: 0.72;
+    transform: translateY(8px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .body-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(230px, 0.95fr);
@@ -307,6 +343,14 @@ h1 {
   font-size: clamp(1.4rem, 2.8vw, 2.3rem);
   font-weight: 800;
   line-height: 1.08;
+}
+
+.panel-jp.is-long {
+  font-size: clamp(1.18rem, 2.3vw, 1.8rem);
+}
+
+.panel-jp.is-extra-long {
+  font-size: clamp(0.98rem, 1.9vw, 1.45rem);
 }
 
 .current-jp {
@@ -348,6 +392,49 @@ h1 {
 .status-panel h2 {
   margin: 0 0 0.15rem;
   font-size: 1rem;
+}
+
+.door-indicator {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+}
+
+.door-indicator span {
+  border: 1px solid #b3c3d2;
+  border-radius: 0.34rem;
+  padding: 0.12rem 0.3rem;
+  text-align: center;
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+  color: #53697a;
+  background: #eff5fb;
+  font-family: "Barlow Condensed", sans-serif;
+}
+
+.door-indicator.left-open span[data-side="left"],
+.door-indicator.right-open span[data-side="right"],
+.door-indicator.both-open span {
+  border-color: color-mix(in srgb, var(--line-accent) 36%, #8ca4b8 64%);
+  color: #2c4d67;
+  background: color-mix(in srgb, var(--line-color) 18%, white 82%);
+}
+
+.tram-lcd[data-travel="arrived"] .door-indicator.left-open span[data-side="left"],
+.tram-lcd[data-travel="arrived"] .door-indicator.right-open span[data-side="right"],
+.tram-lcd[data-travel="arrived"] .door-indicator.both-open span {
+  animation: doorBlink 520ms steps(2, start) infinite;
+}
+
+@keyframes doorBlink {
+  0% {
+    filter: brightness(1);
+  }
+
+  100% {
+    filter: brightness(1.22);
+  }
 }
 
 .status-row {
@@ -452,6 +539,25 @@ h1 {
 .route-line-base {
   background: linear-gradient(90deg, color-mix(in srgb, var(--line-color) 76%, #35506a 24%), color-mix(in srgb, var(--line-accent) 70%, #7a2f3f 30%));
   box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.32);
+  background-size: 34px 100%;
+}
+
+.tram-lcd[data-moving="true"] .route-line-base {
+  animation: routeFlow 1.2s linear infinite;
+}
+
+.tram-lcd[data-moving="false"] .route-line-base {
+  animation-play-state: paused;
+}
+
+@keyframes routeFlow {
+  from {
+    background-position-x: 0;
+  }
+
+  to {
+    background-position-x: 34px;
+  }
 }
 
 .route-progress {

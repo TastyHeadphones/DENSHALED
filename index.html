@@ -64,7 +64,7 @@
           <section class="lcd-body">
             <div class="body-grid">
               <article class="panel next-panel">
-                <p class="panel-label">つぎは / Next</p>
+                <p class="panel-label" id="nextPanelLabel">つぎは / Next</p>
                 <p class="panel-jp roll-target" id="nextStationJP">王子駅前</p>
                 <p class="panel-en roll-target" id="nextStationEN">Oji-ekimae</p>
                 <div class="station-code" id="nextStationCode">SA13</div>
@@ -74,7 +74,7 @@
               </article>
 
               <article class="panel current-panel">
-                <p class="panel-label">ただいま / Now</p>
+                <p class="panel-label" id="currentPanelLabel">ただいま / Now</p>
                 <p class="panel-jp current-jp roll-target" id="currentStationJP">宮ノ前</p>
                 <p class="panel-en roll-target" id="currentStationEN">Miyanomae</p>
                 <div class="station-code current-code" id="currentStationCode">SA10</div>
@@ -85,6 +85,10 @@
 
               <article class="panel status-panel">
                 <h2>運行ステータス</h2>
+                <div class="door-indicator" id="doorIndicator">
+                  <span data-side="left">LEFT</span>
+                  <span data-side="right">RIGHT</span>
+                </div>
                 <div class="status-row">
                   <span>扉案内</span>
                   <strong id="doorInfoJP">右側が開きます</strong>
