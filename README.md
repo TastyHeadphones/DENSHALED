@@ -2,6 +2,12 @@
 
 Modern Japanese tram LCD recreation inspired by FreedomTrain design workflows and real LCD animation references.
 
+## Languages
+
+- English: `README.md`
+- 日本語: `README.ja.md`
+- 简体中文: `README.zh-CN.md`
+
 ## Features
 
 - Complex multi-zone tram display (destination bar, next/now/status panels, route strip, info pages)
